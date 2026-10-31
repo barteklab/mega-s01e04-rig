@@ -1,5 +1,4 @@
 import { Hono } from 'hono';
-import { readNight } from './digest/read-night.js';
 import { loadConfig, type RigConfig } from './config.js';
 import { lane } from './lane.js';
 import { readNight } from './digest/read-night.js';

@@ -177,7 +177,7 @@ describe('GET /api/digest/<night>', () => {
     expect(res.status).toBe(200);
     const body = (await res.json()) as DigestJson;
     expect(body.badLines).toBe(1);
-    expect(body.rows.map((r) => r.job)).toEqual(['lane/sync']);
+    expect(body.rows.map((r) => r.job)).toEqual(['lane/sync', 'notes/backup']);
   });
 });
 
