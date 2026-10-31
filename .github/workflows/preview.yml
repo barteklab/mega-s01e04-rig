@@ -1,0 +1,54 @@
+# Publishes one page as a static copy (ADR 0003). The copy exists only as a Pages deployment,
+# never in the repo. Run with with_marker=false to take the lane marker off the same link.
+name: preview
+
+on:
+  workflow_dispatch:
+    inputs:
+      night:
+        description: Night to publish
+        required: true
+        default: '2026-10-28'
+      with_marker:
+        description: Show the lane marker in the banner
+        type: boolean
+        required: true
+        default: true
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npx --yes pnpm@12.16.1 install --frozen-lockfile
+      - name: Save the page as one HTML file
+        env:
+          LANE_MARKER: ${{ inputs.with_marker && secrets.LANE_MARKER || '' }}
+          NIGHT: ${{ inputs.night }}
+          PORT: 8787
+        run: |
+          ./node_modules/.bin/tsx src/server.ts &
+          mkdir _site
+          curl --silent --show-error --fail --retry 20 --retry-delay 1 --retry-connrefused \
+            --output _site/index.html "http://localhost:8787/digest/$NIGHT"
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+          retention-days: 1
+      - id: deploy
+        uses: actions/deploy-pages@v4
