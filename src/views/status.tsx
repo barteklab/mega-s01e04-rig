@@ -20,7 +20,12 @@ export function StatusBoard({ status }: { status: Status }) {
       ) : (
         <ul>
           {status.nights.map((n) => (
-            <li>{n}</li>
+            <li>
+              <a href={`/digest/${n.night}`}>{n.night}</a>{' '}
+              <span class="mute">
+                {n.ok === null ? '—' : `ok ${n.ok} · retry ${n.retries} · fail ${n.fail}`}
+              </span>
+            </li>
           ))}
         </ul>
       )}
